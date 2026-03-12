@@ -1,0 +1,52 @@
+name: TaskFlow CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Tests Unitaires
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Installation des dependances
+        run: pip install -r requirements.txt
+      - name: Execution de Pytest
+        run: pytest test_app.py -v
+
+  build:
+    name: Build Docker
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+      - name: Build de l'image
+        run: docker build -t taskflow:latest .
+
+  security:
+    name: Scan de vulnerabilites
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+      - name: Build image locale pour le scan
+        run: docker build -t taskflow:latest .
+      - name: Scan Trivy (HIGH & CRITICAL)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'taskflow:latest'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'

@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:7-alpine
+    networks:
+      - taskflow-net
+    ports:
+      - "6379:6379"
+
+  api:
+    image: taskflow:latest
+    environment:
+      - REDIS_HOST=redis
+    ports:
+      - "5000-5005:5000"
+    depends_on:
+      - redis
+    networks:
+      - taskflow-net
+
+networks:
+  taskflow-net:
+    driver: bridge
