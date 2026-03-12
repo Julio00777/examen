@@ -24,7 +24,7 @@ def clean_tasks():
 def test_health(client):
     """Test du health check"""
     response = client.get('/health')
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.get_json()
     assert data['status'] == 'healthy'
     assert data['service'] == 'taskflow'
@@ -55,7 +55,7 @@ def test_get_tasks(client):
     client.post('/tasks', json={"title": "Tache 1"}, content_type='application/json')
     client.post('/tasks', json={"title": "Tache 2"}, content_type='application/json')
     response = client.get('/tasks')
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.get_json()
     assert data['count'] == 2
 
@@ -65,7 +65,7 @@ def test_get_task_by_id(client):
     res = client.post('/tasks', json={"title": "Test"}, content_type='application/json')
     task_id = res.get_json()['id']
     response = client.get(f'/tasks/{task_id}')
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert response.get_json()['title'] == "Test"
 
 
@@ -82,7 +82,7 @@ def test_update_task_status(client):
     response = client.put(f'/tasks/{task_id}',
         json={"status": "doing"},
         content_type='application/json')
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert response.get_json()['status'] == 'doing'
 
 
@@ -101,7 +101,7 @@ def test_delete_task(client):
     res = client.post('/tasks', json={"title": "A supprimer"}, content_type='application/json')
     task_id = res.get_json()['id']
     response = client.delete(f'/tasks/{task_id}')
-    assert response.status_code == 200
+    assert response.status_code == 400
     # Vérifier que la tâche n'existe plus
     response = client.get(f'/tasks/{task_id}')
     assert response.status_code == 404
@@ -110,5 +110,5 @@ def test_delete_task(client):
 def test_homepage(client):
     """Test que la page d'accueil se charge"""
     response = client.get('/')
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert b'TaskFlow' in response.data
